@@ -12,3 +12,8 @@ env/
 ## Python running dirs
 __pycache__/
 
+## Development files and dirs
+ui_templates/files/*.py
+*.pyc
+*.pyo
+*.so
