@@ -1,0 +1,14 @@
+## IDE and text editors files and dirs
+.vscode/
+.idea/
+*.iml
+
+## Python Virtual Environment
+.venv/
+.env/
+venv/
+env/
+
+## Python running dirs
+*/__pycache__/
+
