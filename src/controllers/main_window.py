@@ -1,6 +1,7 @@
 import pprint
 from PySide6.QtWidgets import QMainWindow
 from controllers.application_context import ApplicationContext, LogLevel
+from controllers.main_page import MainPage
 from views.ui_main_window import Ui_MainWindow
 
 
@@ -11,7 +12,7 @@ class WhiteBoardWindow(QMainWindow):
         self._context = context
         self._ui = Ui_MainWindow()
         self._pages = [
-
+            MainPage(context)
         ]
         self._initUI()
 
