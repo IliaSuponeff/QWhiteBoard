@@ -17,3 +17,12 @@ ui_templates/files/*.py
 *.pyc
 *.pyo
 *.so
+
+## Databases files
+*.db
+*.sqlite
+*.db3
+*.sqlite3
+
+## Logs
+*.log
