@@ -67,7 +67,6 @@ class DatabaseController(QSqlDatabase):
             )
         return query
 
-
     def __del__(self) -> None:
         if not self.isOpen():
             return

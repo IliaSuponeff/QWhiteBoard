@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>623</height>
+    <width>1049</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,22 +28,23 @@
         <item>
          <widget class="QPushButton" name="add_album_btn">
           <property name="text">
-           <string>Add album</string>
+           <string>Add new album</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="hSpacer_1">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QPushButton" name="add_new_shelf_btn">
+          <property name="text">
+           <string>Add new shelf</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="archive_swap_btn">
+          <property name="text">
+           <string>See archive</string>
           </property>
-         </spacer>
+         </widget>
         </item>
        </layout>
       </item>
@@ -61,7 +62,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="album_info_frame">
+    <widget class="QStackedWidget" name="items_info_widgets_stack">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>3</horstretch>
@@ -74,6 +75,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
+     <widget class="QWidget" name="unused_page"/>
     </widget>
    </item>
   </layout>

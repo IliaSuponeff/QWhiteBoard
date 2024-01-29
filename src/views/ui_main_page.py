@@ -16,14 +16,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 	QImage, QKeySequence, QLinearGradient, QPainter,
 	QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QHBoxLayout, QListWidget,
-	QListWidgetItem, QPushButton, QSizePolicy, QSpacerItem,
+	QListWidgetItem, QPushButton, QSizePolicy, QStackedWidget,
 	QVBoxLayout, QWidget)
 
 class Ui_MainPage(object):
 	def setupUi(self, MainPage):
 		if not MainPage.objectName():
 			MainPage.setObjectName(u"MainPage")
-		MainPage.resize(794, 623)
+		MainPage.resize(1049, 779)
 		self.hLayout_1 = QHBoxLayout(MainPage)
 		self.hLayout_1.setObjectName(u"hLayout_1")
 		self.list_tools_frame = QFrame(MainPage)
@@ -42,9 +42,15 @@ class Ui_MainPage(object):
 
 		self.hLayout_2.addWidget(self.add_album_btn)
 
-		self.hSpacer_1 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+		self.add_new_shelf_btn = QPushButton(self.list_tools_frame)
+		self.add_new_shelf_btn.setObjectName(u"add_new_shelf_btn")
 
-		self.hLayout_2.addItem(self.hSpacer_1)
+		self.hLayout_2.addWidget(self.add_new_shelf_btn)
+
+		self.archive_swap_btn = QPushButton(self.list_tools_frame)
+		self.archive_swap_btn.setObjectName(u"archive_swap_btn")
+
+		self.hLayout_2.addWidget(self.archive_swap_btn)
 
 
 		self.vLayout_1.addLayout(self.hLayout_2)
@@ -62,17 +68,20 @@ class Ui_MainPage(object):
 
 		self.hLayout_1.addWidget(self.list_tools_frame)
 
-		self.album_info_frame = QFrame(MainPage)
-		self.album_info_frame.setObjectName(u"album_info_frame")
+		self.items_info_widgets_stack = QStackedWidget(MainPage)
+		self.items_info_widgets_stack.setObjectName(u"items_info_widgets_stack")
 		sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		sizePolicy2.setHorizontalStretch(3)
 		sizePolicy2.setVerticalStretch(0)
-		sizePolicy2.setHeightForWidth(self.album_info_frame.sizePolicy().hasHeightForWidth())
-		self.album_info_frame.setSizePolicy(sizePolicy2)
-		self.album_info_frame.setFrameShape(QFrame.StyledPanel)
-		self.album_info_frame.setFrameShadow(QFrame.Raised)
+		sizePolicy2.setHeightForWidth(self.items_info_widgets_stack.sizePolicy().hasHeightForWidth())
+		self.items_info_widgets_stack.setSizePolicy(sizePolicy2)
+		self.items_info_widgets_stack.setFrameShape(QFrame.StyledPanel)
+		self.items_info_widgets_stack.setFrameShadow(QFrame.Raised)
+		self.unused_page = QWidget()
+		self.unused_page.setObjectName(u"unused_page")
+		self.items_info_widgets_stack.addWidget(self.unused_page)
 
-		self.hLayout_1.addWidget(self.album_info_frame)
+		self.hLayout_1.addWidget(self.items_info_widgets_stack)
 
 
 		self.retranslateUi(MainPage)
@@ -82,6 +91,8 @@ class Ui_MainPage(object):
 
 	def retranslateUi(self, MainPage):
 		MainPage.setWindowTitle(QCoreApplication.translate("MainPage", u"Form", None))
-		self.add_album_btn.setText(QCoreApplication.translate("MainPage", u"Add album", None))
+		self.add_album_btn.setText(QCoreApplication.translate("MainPage", u"Add new album", None))
+		self.add_new_shelf_btn.setText(QCoreApplication.translate("MainPage", u"Add new shelf", None))
+		self.archive_swap_btn.setText(QCoreApplication.translate("MainPage", u"See archive", None))
 	# retranslateUi
 
