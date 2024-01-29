@@ -1,8 +1,9 @@
 import argparse
 import os.path
-import sys, io
+import sys, io, typing
 from datetime import datetime
 from pprint import pprint
+from PySide6.QtSql import QSqlDatabase
 from PySide6.QtGui import QIcon, QPixmap, Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
@@ -35,7 +36,8 @@ class ApplicationContext:
         self._albums_dir = os.path.join(self._resources_dir, "albums")
         self._validate_dirs()
 
-        self._database_file = os.path.join(root, "database.sqlite")
+        self._database_filename = os.path.join(root, "database.sqlite")
+        self._database = None
 
         self._clearing_logs()
         self._logs_wrappers = {
@@ -76,6 +78,26 @@ class ApplicationContext:
     @property
     def organization_domain(self) -> str:
         return self._organization_domain
+
+    @property
+    def resources_dir(self) -> str:
+        return self._resources_dir
+
+    @property
+    def albums_dir(self) -> str:
+        return self._albums_dir
+
+    @property
+    def database_filename(self) -> str:
+        return self._database_filename
+
+    @property
+    def database(self) -> typing.Optional[QSqlDatabase]:
+        return self._database
+
+    @database.setter
+    def database(self, value: QSqlDatabase):
+        self._database = value
 
     def load_icon(self, icon_name: str) -> QIcon:
         return QIcon(self.load_pixmap(icon_name))
@@ -139,7 +161,7 @@ class ApplicationContext:
                 os.remove(os.path.join(self._logs_dir, file))
 
     def _validate_dirs(self) -> None:
-        dirs = list(filter(lambda x: x.endswith("_dir"), dir(self)))
+        dirs = list(filter(lambda x: x.endswith("_dir") and x.startswith("_"), dir(self)))
         for _dir in dirs:
             if not hasattr(self, _dir):
                 continue
@@ -174,3 +196,6 @@ class ApplicationContext:
                     continue
 
                 log_wrapper.close()
+
+        if self.database is not None and self.database.isOpen():
+            self.database.close()
