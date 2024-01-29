@@ -14,9 +14,9 @@ class SlideType(Enum):
 
 class AlbumModel:
 
-    def __init__(self, _id: int, shelf_id: int, name: str, slide_type: SlideType, description: str, is_archived: bool) -> None:
+    def __init__(self, _id: int, shelf_name: str, name: str, slide_type: SlideType, description: str, is_archived: bool) -> None:
         self._id = _id
-        self._shelf_id = shelf_id
+        self._shelf_name = shelf_name
         self._name = name
         self._slide_type = slide_type
         self._description = description
@@ -27,12 +27,12 @@ class AlbumModel:
         return self._id
 
     @property
-    def shelf_id(self) -> int:
-        return self._shelf_id
+    def shelf_name(self) -> str:
+        return self._shelf_name
 
-    @shelf_id.setter
-    def shelf_id(self, value: int) -> None:
-        self._shelf_id = value
+    @shelf_name.setter
+    def shelf_name(self, value: str) -> None:
+        self._shelf_name = value
 
     @property
     def name(self) -> str:

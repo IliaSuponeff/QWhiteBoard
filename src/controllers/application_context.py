@@ -34,9 +34,10 @@ class ApplicationContext:
         self._logs_dir = os.path.join(self._resources_dir, "logs")
         self._icons_dir = os.path.join(self._resources_dir, "icons")
         self._albums_dir = os.path.join(self._resources_dir, "albums")
+        self._sql_scripts_dir = os.path.join(self._resources_dir, "sql_scripts")
         self._validate_dirs()
 
-        self._database_filename = os.path.join(root, "database.sqlite")
+        self._database_filename = os.path.join(self._resources_dir, "database.sqlite")
         self._database = None
 
         self._clearing_logs()
@@ -98,6 +99,34 @@ class ApplicationContext:
     @database.setter
     def database(self, value: QSqlDatabase):
         self._database = value
+
+    def load_sql_script(self, script_name: str, default_script: str = "") -> str:
+        path = os.path.join(self._sql_scripts_dir, f"{script_name}.sql")
+        if not os.path.exists(path):
+            self.log(
+                LogLevel.ERROR,
+                "SQL script not found",
+                f"Script name: {script_name}",
+                f"Path: {path}",
+                f"Default script: '{default_script}'"
+            )
+            return default_script
+
+        script_data = default_script
+        with open(path, "r", encoding="UTF-8") as sql_script:
+                script_data = sql_script.read()
+
+        if not script_data:
+            self.log(
+                LogLevel.ERROR,
+                "SQL script is empty",
+                f"Script name: {script_name}",
+                f"Path: {path}",
+                f"Default script: '{default_script}'"
+            )
+            return default_script
+
+        return script_data
 
     def load_icon(self, icon_name: str) -> QIcon:
         return QIcon(self.load_pixmap(icon_name))
