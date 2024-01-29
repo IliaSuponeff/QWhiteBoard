@@ -2,6 +2,7 @@ import argparse
 import os.path
 import sys, io
 from datetime import datetime
+from pprint import pprint
 from PySide6.QtGui import QIcon, QPixmap, Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
@@ -31,6 +32,9 @@ class ApplicationContext:
         self._resources_dir = os.path.join(root, "resources")
         self._logs_dir = os.path.join(self._resources_dir, "logs")
         self._icons_dir = os.path.join(self._resources_dir, "icons")
+        self._albums_dir = os.path.join(self._resources_dir, "albums")
+        self._validate_dirs()
+
         self._database_file = os.path.join(root, "database.sqlite")
 
         self._clearing_logs()
@@ -130,27 +134,35 @@ class ApplicationContext:
             return
         
         files = list(sorted(os.listdir(self._logs_dir)))
-        print(files)
         if len(files) >= 5:
             for file in files[:-5]:
                 os.remove(os.path.join(self._logs_dir, file))
+
+    def _validate_dirs(self) -> None:
+        dirs = list(filter(lambda x: x.endswith("_dir"), dir(self)))
+        for _dir in dirs:
+            if not hasattr(self, _dir):
+                continue
+
+            path = getattr(self, _dir)
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+    def _stdlog(self, log_type: LogLevel, title: str, *messages) -> None:
+        for log_wrapper_type in self._logs_wrappers:
+            for log_wrapper in self._logs_wrappers[log_wrapper_type]:
+                if log_wrapper is None or not isinstance(log_wrapper, io.TextIOWrapper):
+                    continue
+
+                print(f"[LOG-{log_type}][{title}]", "{", file=log_wrapper)
+                print(*[f"\t{message}" for message in messages], sep=os.linesep, file=log_wrapper)
+                print("}", file=log_wrapper)
 
     @staticmethod
     def _default_pixmap() -> QPixmap:
         pixmap = QPixmap(64, 64)
         pixmap.fill(Qt.GlobalColor.lightGray)
         return pixmap
-
-    def _stdlog(self, log_type: LogLevel, title: str, *messages) -> None:
-        for log_wrapper_type in self._logs_wrappers:
-            for log_wrapper in self._logs_wrappers[log_wrapper_type]:
-                if log_wrapper is None or not isinstance(log_wrapper, io.TextIOWrapper):
-                    print(f"Error {log_wrapper}")
-                    continue
-
-                print(f"[LOG-{log_type}][{title}]", "{", file=log_wrapper)
-                print(*[f"\t{message}" for message in messages], sep=os.linesep, file=log_wrapper)
-                print("}", file=log_wrapper)
 
     def __del__(self) -> None:
         for log_wrapper_type in self._logs_wrappers:
