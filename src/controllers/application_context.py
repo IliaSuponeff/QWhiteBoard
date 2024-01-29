@@ -1,6 +1,7 @@
 import argparse
 import os.path
-import sys
+import sys, io
+from datetime import datetime
 from PySide6.QtGui import QIcon, QPixmap, Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
@@ -28,8 +29,21 @@ class ApplicationContext:
         # Application resources directories
         root = os.path.abspath(os.path.dirname(sys.argv[0]))
         self._resources_dir = os.path.join(root, "resources")
+        self._logs_dir = os.path.join(self._resources_dir, "logs")
         self._icons_dir = os.path.join(self._resources_dir, "icons")
         self._database_file = os.path.join(root, "database.sqlite")
+
+        self._clearing_logs()
+        self._logs_wrappers = {
+            "closings": [
+                open(
+                    os.path.join(self._logs_dir, f"{datetime.now().strftime('%Y-%m-%d')}.log"),
+                    "a",
+                    encoding="UTF-8"
+                ),
+            ],
+            "unclosings": [sys.stderr]
+        }
 
         # Loading application settings
         self._analyze_cmd_args()
@@ -84,7 +98,7 @@ class ApplicationContext:
                 "\n".join(messages),
                 QMessageBox.StandardButton.Ok
             )
-            # message_box.setFixedSize(320, 240)
+
             message_box.show()
             message_box.exec()
 
@@ -111,14 +125,40 @@ class ApplicationContext:
 
         self._debug_mode = ns.debug
 
+    def _clearing_logs(self) -> None:
+        if not os.path.exists(self._logs_dir):
+            return
+        
+        files = list(sorted(os.listdir(self._logs_dir)))
+        print(files)
+        if len(files) >= 5:
+            for file in files[:-5]:
+                os.remove(os.path.join(self._logs_dir, file))
+
     @staticmethod
     def _default_pixmap() -> QPixmap:
         pixmap = QPixmap(64, 64)
         pixmap.fill(Qt.GlobalColor.lightGray)
         return pixmap
 
-    @staticmethod
-    def _stdlog(log_type: LogLevel, title: str, *messages) -> None:
-        print(f"[LOG-{log_type}][{title}]", "{")
-        print(*[f"\t{message}" for message in messages], sep=os.linesep)
-        print("}")
+    def _stdlog(self, log_type: LogLevel, title: str, *messages) -> None:
+        for log_wrapper_type in self._logs_wrappers:
+            for log_wrapper in self._logs_wrappers[log_wrapper_type]:
+                if log_wrapper is None or not isinstance(log_wrapper, io.TextIOWrapper):
+                    print(f"Error {log_wrapper}")
+                    continue
+
+                print(f"[LOG-{log_type}][{title}]", "{", file=log_wrapper)
+                print(*[f"\t{message}" for message in messages], sep=os.linesep, file=log_wrapper)
+                print("}", file=log_wrapper)
+
+    def __del__(self) -> None:
+        for log_wrapper_type in self._logs_wrappers:
+            if log_wrapper_type != "closings":
+                continue
+
+            for log_wrapper in self._logs_wrappers[log_wrapper_type]:
+                if log_wrapper is None or not isinstance(log_wrapper, io.TextIOWrapper):
+                    continue
+
+                log_wrapper.close()
