@@ -77,9 +77,9 @@ class Ui_MainPage(object):
 		self.items_info_widgets_stack.setSizePolicy(sizePolicy2)
 		self.items_info_widgets_stack.setFrameShape(QFrame.StyledPanel)
 		self.items_info_widgets_stack.setFrameShadow(QFrame.Raised)
-		self.unused_page = QWidget()
-		self.unused_page.setObjectName(u"unused_page")
-		self.items_info_widgets_stack.addWidget(self.unused_page)
+		self.empty_page = QWidget()
+		self.empty_page.setObjectName(u"empty_page")
+		self.items_info_widgets_stack.addWidget(self.empty_page)
 
 		self.hLayout_1.addWidget(self.items_info_widgets_stack)
 

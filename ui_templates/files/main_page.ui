@@ -75,7 +75,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QWidget" name="unused_page"/>
+     <widget class="QWidget" name="empty_page"/>
     </widget>
    </item>
   </layout>

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS "albums" (
 	"shelf_name"	TEXT DEFAULT NULL,
 	"name"	TEXT NOT NULL UNIQUE,
 	"slide_type"	INTEGER NOT NULL,
+	"slide_size"	TEXT NOT NULL,
 	"description"	INTEGER NOT NULL,
 	"is_archived"	INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY("id" AUTOINCREMENT)

@@ -3,22 +3,24 @@ from PySide6.QtCore import QSize
 
 
 class SlideType(Enum):
-    A0 = QSize(841, 1189)
-    A1 = QSize(594, 841)
-    A2 = QSize(420, 594)
-    A3 = QSize(297, 420)
-    A4 = QSize(210, 297)
-    A5 = QSize(148, 210)
-    A6 = QSize(105, 148)
+    A0 = QSize(8410, 11890)
+    A1 = QSize(5940, 8410)
+    A2 = QSize(4200, 5940)
+    A3 = QSize(2970, 4200)
+    A4 = QSize(2100, 2970)
+    A5 = QSize(1480, 2100)
+    A6 = QSize(1050, 1480)
+    CUSTOM = QSize(4000, 4000)
 
 
 class AlbumModel:
 
-    def __init__(self, _id: int, shelf_name: str, name: str, slide_type: SlideType, description: str, is_archived: bool) -> None:
+    def __init__(self, _id: int, shelf_name: str, name: str, slide_type: SlideType, slide_size: QSize, description: str, is_archived: bool) -> None:
         self._id = _id
         self._shelf_name = shelf_name
         self._name = name
         self._slide_type = slide_type
+        self._slide_size = slide_size
         self._description = description
         self._is_archived = bool(is_archived)
 
@@ -45,6 +47,21 @@ class AlbumModel:
     @property
     def slide_type(self) -> SlideType:
         return self._slide_type
+
+    @property
+    def slide_size(self) -> QSize:
+        if self._slide_type == SlideType.CUSTOM:
+            return self._slide_size
+
+        return self.slide_type.value
+
+    @slide_size.setter
+    def slide_size(self, value: QSize) -> None:
+        if self.slide_type != SlideType.CUSTOM:
+            return
+
+        self._slide_size = value
+
 
     @slide_type.setter
     def slide_type(self, value: SlideType) -> None:
