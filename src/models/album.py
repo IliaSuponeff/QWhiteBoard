@@ -1,5 +1,5 @@
 from enum import Enum
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, QDateTime
 
 
 class SlideType(Enum):
@@ -40,10 +40,17 @@ class SlideType(Enum):
 
 class AlbumModel:
 
-    def __init__(self, _id: int, shelf_name: str, name: str, slide_type: SlideType, slide_size: QSize, description: str, is_archived: bool) -> None:
+    def __init__(
+            self, _id: int, shelf_name: str, name: str,
+            create_on: QDateTime, change_on: QDateTime,
+            slide_type: SlideType, slide_size: QSize,
+            description: str, is_archived: bool
+        ) -> None:
         self._id = _id
         self._shelf_name = shelf_name
         self._name = name
+        self._create_on = create_on
+        self._change_on = change_on
         self._slide_type = slide_type
         self._slide_size = slide_size
         self._description = description
@@ -68,6 +75,18 @@ class AlbumModel:
     @name.setter
     def name(self, value: str) -> None:
         self._name = value
+
+    @property
+    def create_on(self) -> QDateTime:
+        return self._create_on
+
+    @property
+    def change_on(self) -> QDateTime:
+        return self._change_on
+
+    @change_on.setter
+    def change_on(self, value: QDateTime) -> None:
+        self._change_on = value
 
     @property
     def slide_type(self) -> SlideType:
@@ -124,4 +143,7 @@ class AlbumModel:
         return self._id == __value._id or self._name == __value._name
 
 
-EMPTY_ALBUM = AlbumModel(-1, "", "", SlideType.A4_VERTICAL, SlideType.A4_VERTICAL.value, "", False)
+EMPTY_ALBUM = AlbumModel(
+    -1, "", "", QDateTime.currentDateTime(), QDateTime.currentDateTime(),
+    SlideType.A4_VERTICAL, SlideType.A4_VERTICAL.value, "", False
+)

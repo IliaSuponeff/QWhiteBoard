@@ -66,7 +66,7 @@ class AlbumConstructDialog(AbstractDialogController):
             return
 
         self._album = self._compile_album()
-        print(self._album)
+        self.close()
 
     @abc.abstractmethod
     def _is_valide_album_data(self) -> bool:

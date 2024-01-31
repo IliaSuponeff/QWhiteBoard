@@ -1,4 +1,4 @@
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, QDateTime
 from PySide6.QtSql import QSqlDatabase, QSqlQuery
 from controllers.application_context import ApplicationContext, LogLevel
 from models.album import AlbumModel, SlideType
@@ -85,6 +85,8 @@ class DatabaseController(QSqlDatabase):
         query = self.execute_script(
             "add_album",
             name=album_name,
+            create_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
+            change_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
             slide_type=slide_type.name,
             slide_size=f"{slide_size.width()}x{slide_size.height()}",
             description=description
@@ -98,10 +100,12 @@ class DatabaseController(QSqlDatabase):
             query.value(0),
             query.value(1),
             query.value(2),
-            SlideType[query.value(3)],
-            QSize(*list(map(int, query.value(4).split('x')))),
-            query.value(5),
-            bool(query.value(6))
+            QDateTime.fromString(query.value(3), "yyyy-MM-dd hh:mm"),
+            QDateTime.fromString(query.value(4), "yyyy-MM-dd hh:mm"),
+            SlideType[query.value(5)],
+            QSize(*list(map(int, query.value(6).split('x')))),
+            query.value(7),
+            bool(query.value(8))
         )
 
     def get_shelf_albums(self, shelf: ShelfModel) -> list[AlbumModel]:
@@ -112,10 +116,12 @@ class DatabaseController(QSqlDatabase):
                 query.value(0),
                 query.value(1),
                 query.value(2),
-                SlideType[query.value(3)],
-                QSize(*list(map(int, query.value(4).split('x')))),
-                query.value(5),
-                bool(query.value(6))
+                QDateTime.fromString(query.value(3), "yyyy-MM-dd hh:mm"),
+                QDateTime.fromString(query.value(4), "yyyy-MM-dd hh:mm"),
+                SlideType[query.value(5)],
+                QSize(*list(map(int, query.value(6).split('x')))),
+                query.value(7),
+                bool(query.value(8))
             )
             albums.append(album)
 

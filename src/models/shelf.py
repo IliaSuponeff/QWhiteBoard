@@ -1,8 +1,17 @@
+from PySide6.QtCore import QDateTime
+
+
 class ShelfModel:
 
-    def __init__(self, _id: int, name: str, description: str, is_archived: bool) -> None:
+    def __init__(
+            self, _id: int, name: str,
+            create_on: QDateTime, change_on: QDateTime,
+            description: str, is_archived: bool
+        ) -> None:
         self._id = _id
         self._name = name
+        self._create_on = create_on
+        self._change_on = change_on
         self._description = description
         self._is_archived = bool(is_archived)
 
@@ -17,6 +26,18 @@ class ShelfModel:
     @name.setter
     def name(self, value: str) -> None:
         self._name = value
+
+    @property
+    def create_on(self) -> QDateTime:
+        return self._create_on
+
+    @property
+    def change_on(self) -> QDateTime:
+        return self._change_on
+
+    @change_on.setter
+    def change_on(self, value: QDateTime) -> None:
+        self._change_on = value
 
     @property
     def description(self) -> str:
@@ -50,4 +71,4 @@ class ShelfModel:
         return self._id == __value._id or self._name == __value._name
 
 
-EMPTY_SHELF = ShelfModel(-1, "", "", False)
+EMPTY_SHELF = ShelfModel(-1, "", QDateTime.currentDateTime(), QDateTime.currentDateTime(), "", False)

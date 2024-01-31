@@ -5,6 +5,7 @@ from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.album_info_page import AlbumInfoPage
 from controllers.album_construct_dialog import CreationAlbumDialog
+from controllers.database import DatabaseController
 from views.ui_main_page import Ui_MainPage
 from models.shelf import EMPTY_SHELF
 
@@ -56,7 +57,7 @@ class MainPage(AbstractPageController):
             item = QListWidgetItem(self.context.load_icon("album.png"), album.name)
             self.ui.items_list_widget.addItem(item)
 
-    def setCurrentPage(self, page_name: str) -> None:
+    def setCurrentPage(self, page_name: str, **kwargs) -> None:
         if page_name not in self._pages:
             self.context.log(
                 LogLevel.ERROR,
@@ -79,16 +80,18 @@ class MainPage(AbstractPageController):
             )
             return
 
-        self.ui.items_info_widgets_stack.setCurrentWidget(self._pages[page_name])
+        self.ui.items_info_widgets_stack.setCurrentWidget(page)
+        if hasattr(page, "updateData"):
+            page.updateData(**kwargs)
 
     @property
     def ui(self) -> Ui_MainPage:
         return self._ui
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
-        self.ui.add_album_btn
         return {
             "add_album_btn": ("clicked", self._on_clicked_add_album_btn),
+            "items_list_widget": ("itemClicked", self._on_click_list_item)
         }
 
     def controller_images(self) -> dict[str, str]:
@@ -98,6 +101,13 @@ class MainPage(AbstractPageController):
         dialog, exec_code = self.context.call_dialog(
             CreationAlbumDialog(self.context)
         )
-        
+        if exec_code != 0:
+            return
 
+        self.reload_ui()
+
+    def _on_click_list_item(self, item: QListWidgetItem) -> None:
+        db: DatabaseController = self.context.database
+        album = db.get_album(item.text())
+        self.setCurrentPage("album_info_page", album=album)
 
