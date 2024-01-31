@@ -75,6 +75,7 @@ class AbstractDialogController(QDialog):
         super().__init__()
         self._context = context
         self._ui = ui
+        self._execution_message = ""
         self._ui.setupUi(self)
         self.setModal(True)
         self.load_bindings(bindings)
@@ -131,7 +132,18 @@ class AbstractDialogController(QDialog):
     @property
     def context(self) -> ApplicationContext:
         return self._context
-    
+
     @property
     def ui(self) -> object:
         return self._ui
+
+    @property
+    def execution_message(self) -> str:
+        return self._execution_message
+
+    @execution_message.setter
+    def execution_message(self, message: str) -> None:
+        if message is None:
+            return
+
+        self._execution_message = str(message)

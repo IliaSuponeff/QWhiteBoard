@@ -7,10 +7,35 @@ class SlideType(Enum):
     A1 = QSize(5940, 8410)
     A2 = QSize(4200, 5940)
     A3 = QSize(2970, 4200)
-    A4 = QSize(2100, 2970)
+    A4_VERTICAL = QSize(2100, 2970)
+    A4_HORIZONTAL = QSize(2970, 2100)
     A5 = QSize(1480, 2100)
     A6 = QSize(1050, 1480)
     CUSTOM = QSize(4000, 4000)
+
+    @classmethod
+    def minimum_width(cls) -> int:
+        return min(
+            [_type.value.width() for _type in cls]
+        )
+
+    @classmethod
+    def minimum_height(cls) -> int:
+        return min(
+            [_type.value.height() for _type in cls]
+        )
+
+    @classmethod
+    def maximum_width(cls) -> int:
+        return max(
+            [_type.value.width() for _type in cls]
+        )
+
+    @classmethod
+    def maximum_height(cls) -> int:
+        return max(
+            [_type.value.height() for _type in cls]
+        )
 
 
 class AlbumModel:
@@ -84,7 +109,7 @@ class AlbumModel:
         self._is_archived = bool(value)
 
     def __str__(self) -> str:
-        return f"AlbumModel(id={self._id}, shelf_id={self._shelf_id}, name={self._name}, slide_type={self._slide_type}, is_archived={self._is_archived})"
+        return f"AlbumModel(id={self._id}, shelf_id={self._shelf_name}, name={self._name}, slide_type={self._slide_type}, is_archived={self._is_archived})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -97,3 +122,6 @@ class AlbumModel:
             return False
 
         return self._id == __value._id or self._name == __value._name
+
+
+EMPTY_ALBUM = AlbumModel(-1, "", "", SlideType.A4_VERTICAL, SlideType.A4_VERTICAL.value, "", False)

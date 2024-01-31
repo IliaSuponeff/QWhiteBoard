@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "slides" (
 
 CREATE TABLE IF NOT EXISTS "albums" (
 	"id"	INTEGER NOT NULL,
-	"shelf_name"	TEXT DEFAULT NULL,
+	"shelf_name"	TEXT DEFAULT "",
 	"name"	TEXT NOT NULL UNIQUE,
 	"slide_type"	INTEGER NOT NULL,
 	"slide_size"	TEXT NOT NULL,

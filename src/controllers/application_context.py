@@ -5,7 +5,7 @@ from datetime import datetime
 from pprint import pprint
 from PySide6.QtSql import QSqlDatabase
 from PySide6.QtGui import QIcon, QPixmap, Qt
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QMessageBox, QDialog
 
 
 class LogLevel:
@@ -100,6 +100,18 @@ class ApplicationContext:
     def database(self, value: QSqlDatabase):
         self._database = value
 
+    def call_dialog(self, dialog: QDialog) -> tuple[QDialog, int]:
+        dialog.show()
+        exec_code = dialog.exec()
+        self.log(
+            LogLevel.DEBUG,
+            "Call dialog",
+            f"Dialog: {dialog}",
+            f"Execution message: '{dialog.execution_message}'",
+            f"Execution code: {exec_code}"
+        )
+        return dialog, exec_code
+
     def load_sql_script(self, script_name: str, default_script: str = "") -> str:
         path = os.path.join(self._sql_scripts_dir, f"{script_name}.sql")
         if not os.path.exists(path):
@@ -134,6 +146,12 @@ class ApplicationContext:
     def load_pixmap(self, pixmap_name: str) -> QPixmap:
         path = os.path.join(self._icons_dir, pixmap_name)
         if os.path.exists(path):
+            self.log(
+                LogLevel.DEBUG,
+                "Not found image",
+                f"Try load image from: {self._icons_dir}",
+                f"Image name: {pixmap_name}"
+            )
             return QPixmap(path)
 
         return self._default_pixmap()
