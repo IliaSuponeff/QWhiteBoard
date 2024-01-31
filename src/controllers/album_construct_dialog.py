@@ -58,7 +58,8 @@ class AlbumConstructDialog(AbstractDialogController):
             self.context.log(
                 LogLevel.ERROR,
                 "Album exsists",
-                f"Album with name '{self.ui.name_le.text().strip()}' already exsist in appliccation",
+                f"Album with name: '{self.ui.name_le.text().strip()}'",
+                "Already exsist in appliccation",
                 f"Change it, and try againg",
                 is_window_log=True
             )
