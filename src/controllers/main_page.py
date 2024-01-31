@@ -1,9 +1,12 @@
 import pprint
+from PySide6.QtCore import QSize
+from PySide6.QtWidgets import QListWidgetItem
 from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.album_info_page import AlbumInfoPage
 from controllers.album_construct_dialog import CreationAlbumDialog
 from views.ui_main_page import Ui_MainPage
+from models.shelf import EMPTY_SHELF
 
 
 class MainPage(AbstractPageController):
@@ -15,6 +18,10 @@ class MainPage(AbstractPageController):
             "album_info_page": AlbumInfoPage(self.context),
         }
         self._initUI()
+
+    def reload_ui(self) -> None:
+        self.ui.items_list_widget.clear()
+        self._load_albums()
 
     def _initUI(self):
         for page_name in self._pages:
@@ -31,6 +38,23 @@ class MainPage(AbstractPageController):
             self.ui.items_info_widgets_stack.addWidget(page)
 
         self.setCurrentPage("empty_page")
+
+        self.ui.items_list_widget.setIconSize(QSize(48, 48))
+        self.reload_ui()
+
+    def _load_albums(self) -> None:
+        albums = self.context.database.get_shelf_albums(EMPTY_SHELF)
+        self.context.log(
+            LogLevel.DEBUG,
+            f"Loaded albums",
+            f"Controller: {self.__class__.__name__}",
+            f"Albums count: {len(albums)}",
+            *albums
+        )
+
+        for album in albums:
+            item = QListWidgetItem(self.context.load_icon("album.png"), album.name)
+            self.ui.items_list_widget.addItem(item)
 
     def setCurrentPage(self, page_name: str) -> None:
         if page_name not in self._pages:

@@ -2,6 +2,7 @@ from PySide6.QtCore import QSize
 from PySide6.QtSql import QSqlDatabase, QSqlQuery
 from controllers.application_context import ApplicationContext, LogLevel
 from models.album import AlbumModel, SlideType
+from models.shelf import ShelfModel
 
 
 class DatabaseSqlScript(QSqlQuery):
@@ -102,6 +103,23 @@ class DatabaseController(QSqlDatabase):
             query.value(5),
             bool(query.value(6))
         )
+
+    def get_shelf_albums(self, shelf: ShelfModel) -> list[AlbumModel]:
+        query = self.execute_script("get_item", table="albums", field="shelf_name", value=shelf.name)[0]
+        albums = []
+        while query.next():
+            album = AlbumModel(
+                query.value(0),
+                query.value(1),
+                query.value(2),
+                SlideType[query.value(3)],
+                QSize(*list(map(int, query.value(4).split('x')))),
+                query.value(5),
+                bool(query.value(6))
+            )
+            albums.append(album)
+
+        return albums
 
     def __del__(self) -> None:
         if not self.isOpen():

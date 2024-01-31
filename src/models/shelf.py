@@ -48,3 +48,6 @@ class ShelfModel:
             return False
 
         return self._id == __value._id or self._name == __value._name
+
+
+EMPTY_SHELF = ShelfModel(-1, "", "", False)

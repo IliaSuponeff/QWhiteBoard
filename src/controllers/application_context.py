@@ -146,13 +146,14 @@ class ApplicationContext:
     def load_pixmap(self, pixmap_name: str) -> QPixmap:
         path = os.path.join(self._icons_dir, pixmap_name)
         if os.path.exists(path):
-            self.log(
-                LogLevel.DEBUG,
-                "Not found image",
-                f"Try load image from: {self._icons_dir}",
-                f"Image name: {pixmap_name}"
-            )
             return QPixmap(path)
+
+        self.log(
+            LogLevel.DEBUG,
+            "Not found image",
+            f"Try load image from: {self._icons_dir}",
+            f"Image name: {pixmap_name}"
+        )
 
         return self._default_pixmap()
 

@@ -9,8 +9,8 @@ class QWhiteBoardApplication(QApplication):
     def __init__(self) -> None:
         super().__init__()
         self._context = ApplicationContext(self)
-        self._main_window = WhiteBoardWindow(self.context)
         self._database = DatabaseController(self.context)
+        self._main_window = WhiteBoardWindow(self.context)
 
         self.context.log(
             LogLevel.INFO,

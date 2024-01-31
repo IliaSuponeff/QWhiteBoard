@@ -109,7 +109,7 @@ class AlbumModel:
         self._is_archived = bool(value)
 
     def __str__(self) -> str:
-        return f"AlbumModel(id={self._id}, shelf_id={self._shelf_name}, name={self._name}, slide_type={self._slide_type}, is_archived={self._is_archived})"
+        return f"AlbumModel(id={self._id}, shelf_id={self._shelf_name}, name={self._name}, slide_type={self.slide_type}, slide_size={self.slide_size}, is_archived={self._is_archived})"
 
     def __repr__(self) -> str:
         return self.__str__()
