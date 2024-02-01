@@ -127,6 +127,9 @@ class DatabaseController(QSqlDatabase):
 
         return albums
 
+    def remove_album(self, album: AlbumModel) -> None:
+        self.execute_script("remove_item", table="albums", field="name", value=album.name)
+
     def __del__(self) -> None:
         if not self.isOpen():
             return

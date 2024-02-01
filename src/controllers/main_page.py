@@ -16,7 +16,12 @@ class MainPage(AbstractPageController):
         super().__init__(context, Ui_MainPage(), bindings)
         self._pages = {
             "empty_page": self.ui.empty_page,
-            "album_info_page": AlbumInfoPage(self.context),
+            "album_info_page": AlbumInfoPage(
+                self.context,
+                bindings={
+                    "delete_album_btn": ("clicked", self._on_click_delete_album_btn),
+                }
+            ),
         }
         self._initUI()
 
@@ -111,3 +116,8 @@ class MainPage(AbstractPageController):
         album = db.get_album(item.text())
         self.setCurrentPage("album_info_page", album=album)
 
+    def _on_click_delete_album_btn(self) -> None:
+        db: DatabaseController = self.context.database
+        db.remove_album(self._pages["album_info_page"].album)
+        self.reload_ui()
+        self.setCurrentPage("empty_page")
