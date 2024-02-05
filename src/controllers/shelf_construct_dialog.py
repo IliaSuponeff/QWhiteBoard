@@ -105,4 +105,7 @@ class EditShelfDialog(ShelfConstructDialog):
 
     def _is_valide_shelf_data(self) -> bool:
         name: str = self.ui.name_le.text().strip()
+        if self.shelf.name == name:
+            return True
+
         return len(name) > 0 and not self.context.database.is_contain_shelf(shelf_name=name)

@@ -133,4 +133,7 @@ class EditAlbumDialog(AlbumConstructDialog):
 
     def _is_valide_album_data(self) -> bool:
         name: str = self.ui.name_le.text().strip()
+        if self.album.name == name:
+            return True
+
         return len(name) > 0 and not self.context.database.is_contain_album(album_name=name)
