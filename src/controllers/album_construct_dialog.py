@@ -3,7 +3,7 @@ from controllers.abc_controller import AbstractDialogController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.database import DatabaseController
 from views.ui_album_construct_dialog import Ui_AlbumConstructDialog
-from models.album import AlbumModel, EMPTY_ALBUM, SlideType
+from models.album import AlbumModel, EMPTY_ALBUM, SlideType, QDateTime
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtCore import QSize
 
@@ -59,7 +59,7 @@ class AlbumConstructDialog(AbstractDialogController):
                 LogLevel.ERROR,
                 "Album exsists",
                 f"Album with name: '{self.ui.name_le.text().strip()}'",
-                "Already exsist in appliccation",
+                "Already exsist in application",
                 f"Change it, and try againg",
                 is_window_log=True
             )
@@ -121,7 +121,15 @@ class EditAlbumDialog(AlbumConstructDialog):
         description: str = self.ui.description_text_edit.toPlainText().strip()
 
         db: DatabaseController = self.context.database
-        return db.create_new_album(name, slide_type, QSize(width, height), description)
+        return db.update_album(
+            self.album.name,
+            AlbumModel(
+                _id=0, shelf_name=self.album.shelf_name, name=name,
+                create_on=self.album.create_on, change_on=QDateTime.currentDateTime(),
+                slide_type=slide_type, slide_size=QSize(width, height), description=description,
+                is_archived=self.album.is_archived
+            )
+        )
 
     def _is_valide_album_data(self) -> bool:
         name: str = self.ui.name_le.text().strip()

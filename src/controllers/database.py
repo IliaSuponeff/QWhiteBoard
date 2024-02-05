@@ -10,9 +10,9 @@ class DatabaseSqlScript(QSqlQuery):
     def __init__(self, script: str, db: QSqlDatabase, **kwargs) -> None:
         super().__init__(db)
         for key, value in kwargs.items():
-            script = script.replace("{{" + key + "}}", str(value)).replace('\'', '').replace('(', '').replace(')', '')
+            val = str(value).replace('\'', '').replace('(', '').replace(')', '')
+            script = script.replace("{{" + key + "}}", val)
         self._script = script.strip().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
-        print(self.script)
 
     @property
     def script(self) -> str:
@@ -73,10 +73,17 @@ class DatabaseController(QSqlDatabase):
                 f"Error by driver: {query.lastError().driverText()}"
                 f"Error by database: {query.lastError().databaseText()}"
             )
+
         return query
 
     def is_contain_album(self, album_name: str) -> bool:
         query = self.execute_script("is_contain_item", table="albums", field="name", value=album_name)[0]
+        query.next()
+
+        return query.value(0) != 0
+
+    def is_contain_shelf(self, shelf_name: str) -> bool:
+        query = self.execute_script("is_contain_item", table="shelfs", field="name", value=shelf_name)[0]
         
         query.next()
         return query.value(0) != 0
@@ -93,6 +100,16 @@ class DatabaseController(QSqlDatabase):
         )[0]
         return self.get_album(album_name)
 
+    def create_new_shelf(self, shelf_name: str, description: str) -> ShelfModel:
+        query = self.execute_script(
+            "add_shelf",
+            name=shelf_name,
+            create_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
+            change_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
+            description=description
+        )[0]
+        return self.get_shelf(shelf_name)
+
     def get_album(self, name: str) -> AlbumModel:
         query = self.execute_script("get_item", table="albums", field="name", value=name)[0]
         query.next()
@@ -106,6 +123,18 @@ class DatabaseController(QSqlDatabase):
             QSize(*list(map(int, query.value(6).split('x')))),
             query.value(7),
             bool(query.value(8))
+        )
+
+    def get_shelf(self, name: str) -> ShelfModel:
+        query = self.execute_script("get_item", table="shelfs", field="name", value=name)[0]
+        query.next()
+        return ShelfModel(
+            query.value(0),
+            query.value(1),
+            QDateTime.fromString(query.value(2), "yyyy-MM-dd hh:mm"),
+            QDateTime.fromString(query.value(3), "yyyy-MM-dd hh:mm"),
+            query.value(4),
+            bool(query.value(5)),
         )
 
     def get_shelf_albums(self, shelf: ShelfModel) -> list[AlbumModel]:
@@ -127,8 +156,35 @@ class DatabaseController(QSqlDatabase):
 
         return albums
 
+    def get_shelfs(self) -> list[ShelfModel]:
+        query = self.execute_script("get_all_items", table="shelfs")[0]
+        shelfs = []
+        while query.next():
+            shelf = ShelfModel(
+                query.value(0),
+                query.value(1),
+                QDateTime.fromString(query.value(2), "yyyy-MM-dd hh:mm"),
+                QDateTime.fromString(query.value(3), "yyyy-MM-dd hh:mm"),
+                query.value(4),
+                bool(query.value(5)),
+            )
+            shelfs.append(shelf)
+
+        return shelfs
+
     def remove_album(self, album: AlbumModel) -> None:
         self.execute_script("remove_item", table="albums", field="name", value=album.name)
+
+    def remove_shelf(self, shelf: ShelfModel) -> None:
+        self.execute_script("remove_item", table="shelfs", field="name", value=shelf.name)
+
+    def remove_item(self, item: object) -> None:
+        if isinstance(item, AlbumModel):
+            self.remove_album(item)
+        elif isinstance(item, ShelfModel):
+            self.remove_shelf(item)
+        else:
+            self.context.log(LogLevel.ERROR, f"Unknown item type: {item} to delete it")
 
     def update_album(self, last_name: str ,album: AlbumModel) -> None:
         self.execute_script(
@@ -144,9 +200,32 @@ class DatabaseController(QSqlDatabase):
                 f"is_archived={1 if album.is_archived else 0}",
             )
         )
+        return self.get_album(album.name)
+
+    def update_shelf(self, last_name: str ,shelf: ShelfModel) -> None:
+        self.execute_script(
+            "update_item",
+            table="shelfs", key="name", key_value=last_name,
+            values=(
+                f"name=\"{shelf.name}\"",
+                f"change_on=\"{QDateTime.currentDateTime().toString('yyyy-MM-dd hh:mm')}\"",
+                f"description=\"{shelf.description}\"",
+                f"is_archived={1 if shelf.is_archived else 0}",
+            )
+        )
+        return self.get_shelf(shelf.name)
+
+    def update_item(self, last_name: str, item: object) -> None:
+        if isinstance(item, AlbumModel):
+            self.update_album(last_name, item)
+        elif isinstance(item, ShelfModel):
+            self.update_shelf(last_name, item)
+        else:
+            self.context.log(LogLevel.ERROR, f"Unknown item type: {item} to update it")
 
     def __del__(self) -> None:
         if not self.isOpen():
             return
 
+        self.commit()
         self.close()

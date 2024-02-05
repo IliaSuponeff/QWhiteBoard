@@ -4,7 +4,9 @@ from PySide6.QtWidgets import QListWidgetItem
 from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.album_info_page import AlbumInfoPage
+from controllers.shelf_info_page import ShelfInfoPage
 from controllers.album_construct_dialog import CreationAlbumDialog, EditAlbumDialog
+from controllers.shelf_construct_dialog import CreationShelfDialog, EditShelfDialog
 from controllers.database import DatabaseController, AlbumModel
 from views.ui_main_page import Ui_MainPage
 from models.shelf import EMPTY_SHELF
@@ -19,16 +21,31 @@ class MainPage(AbstractPageController):
             "album_info_page": AlbumInfoPage(
                 self.context,
                 bindings={
-                    "delete_album_btn": ("clicked", self._on_click_delete_album_btn),
+                    "delete_album_btn": ("clicked", self._on_click_delete_item_btn),
                     "edit_album_btn": ("clicked", self._on_click_edit_album_btn),
-                    "archive_swap_btn": ("clicked", self._on_click_archive_album_btn)
+                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn)
                 }
             ),
+            "shelf_info_page": ShelfInfoPage(
+                self.context,
+                bindings={
+                    "delete_shelf_btn": ("clicked", self._on_click_delete_item_btn),
+                    "edit_shelf_btn": ("clicked", self._on_click_edit_album_btn),
+                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn)
+                }
+            )
         }
+        self._shelfs_count = 0
+        self._current_page_name = "empty_page"
         self._initUI()
+
+    @property
+    def shelfs_count(self) -> int:
+        return self._shelfs_count
 
     def reload_ui(self) -> None:
         self.ui.items_list_widget.clear()
+        self._load_shelfs()
         self._load_albums()
 
     def _initUI(self):
@@ -50,6 +67,26 @@ class MainPage(AbstractPageController):
         self.ui.items_list_widget.setIconSize(QSize(48, 48))
         self.reload_ui()
 
+    def _load_shelfs(self) -> None:
+        shelfs = self.context.database.get_shelfs()
+        shelfs = list(filter(lambda shelf: shelf.is_archived == self.context.is_archive_mode, shelfs))
+        self.context.log(
+            LogLevel.DEBUG,
+            f"Loaded shelfs",
+            f"Controller: {self.__class__.__name__}",
+            f"Mode: {'ARCHIVE' if self.context.is_archive_mode else 'NORMAL'}",
+            f"Shelfs count: {len(shelfs)}",
+            *shelfs
+        )
+
+        self._shelfs_count = len(shelfs)
+        for shelf in shelfs:
+            item = QListWidgetItem(
+                self.context.load_icon("shelf.png"),
+                f"{'[ARCHIVE] ' if shelf.is_archived else ''}{shelf.name}"
+            )
+            self.ui.items_list_widget.addItem(item)
+
     def _load_albums(self) -> None:
         albums: list[AlbumModel] = self.context.database.get_shelf_albums(EMPTY_SHELF)
         albums = list(filter(lambda album: album.is_archived == self.context.is_archive_mode, albums))
@@ -57,15 +94,19 @@ class MainPage(AbstractPageController):
             LogLevel.DEBUG,
             f"Loaded albums",
             f"Controller: {self.__class__.__name__}",
+            f"Mode: {'ARCHIVE' if self.context.is_archive_mode else 'NORMAL'}",
             f"Albums count: {len(albums)}",
             *albums
         )
 
         for album in albums:
-            item = QListWidgetItem(self.context.load_icon("album.png"), f"{'[ARCHIVE] ' if album.is_archived else ''}{album.name}")
+            item = QListWidgetItem(
+                self.context.load_icon("album.png"),
+                f"{'[ARCHIVE] ' if album.is_archived else ''}{album.name}"
+            )
             self.ui.items_list_widget.addItem(item)
 
-    def setCurrentPage(self, page_name: str, **kwargs) -> None:
+    def setCurrentPage(self, page_name: str, *args, **kwargs) -> None:
         if page_name not in self._pages:
             self.context.log(
                 LogLevel.ERROR,
@@ -90,18 +131,20 @@ class MainPage(AbstractPageController):
 
         self.ui.items_info_widgets_stack.setCurrentWidget(page)
         if hasattr(page, "updateData"):
-            page.updateData(**kwargs)
+            page.updateData(*args, **kwargs)
+        
+        self._current_page_name = page_name
 
     @property
     def ui(self) -> Ui_MainPage:
         return self._ui
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
-        self.ui.archive_swap_btn
         return {
             "add_album_btn": ("clicked", self._on_clicked_add_album_btn),
-            "items_list_widget": ("itemClicked", self._on_click_list_item),
-            "archive_swap_btn": ("clicked", self._on_click_archive_mode_swap_btn)
+            "add_new_shelf_btn": ("clicked", self._on_clicked_add_new_shelf_btn),
+            "items_list_widget": ("currentItemChanged", self._on_click_list_item),
+            "archive_swap_btn": ("clicked", self._on_click_archive_mode_swap_btn),
         }
 
     def controller_images(self) -> dict[str, str]:
@@ -116,33 +159,90 @@ class MainPage(AbstractPageController):
 
         self.reload_ui()
 
-    def _on_click_list_item(self, item: QListWidgetItem) -> None:
-        db: DatabaseController = self.context.database
-        album = db.get_album(item.text().replace("[ARCHIVE]", "").strip())
-        self.setCurrentPage("album_info_page", album=album)
-
-    def _on_click_delete_album_btn(self) -> None:
-        db: DatabaseController = self.context.database
-        db.remove_album(self._pages["album_info_page"].album)
-        self.reload_ui()
-        self.setCurrentPage("empty_page")
-
-    def _on_click_edit_album_btn(self) -> None:
+    def _on_clicked_add_new_shelf_btn(self) -> None:
         dialog, exec_code = self.context.call_dialog(
-            EditAlbumDialog(self._pages["album_info_page"].album, self.context)
+            CreationShelfDialog(self.context)
         )
         if exec_code != 0:
             return
 
         self.reload_ui()
-        self.setCurrentPage("album_info_page", album=dialog.album)
 
-    def _on_click_archive_album_btn(self) -> None:
-        album = self._pages["album_info_page"].album
-        album.is_archived = not album.is_archived
-        self.context.database.update_album(album.name, album)
+    def _on_click_list_item(self, item: QListWidgetItem, *args) -> None:
+        if item is None:
+            return
+
+        db: DatabaseController = self.context.database
+        index = self.ui.items_list_widget.row(item)
+
+        if 0 <= index < self._shelfs_count:
+            shelf = db.get_shelf(item.text().replace("[ARCHIVE]", "").strip())
+            self.setCurrentPage("shelf_info_page", shelf=shelf)
+        else:
+            album = db.get_album(item.text().replace("[ARCHIVE]", "").strip())
+            self.setCurrentPage("album_info_page", album=album)
+
+    def _on_click_delete_item_btn(self) -> None:
+        if self._current_page_name == "empty_page":
+            return
+
+        page = self._pages[self._current_page_name]
+        if hasattr(page, "album"):
+            item = page.album
+        elif hasattr(page, "shelf"):
+            item = page.shelf
+        else:
+            return
+
+        db: DatabaseController = self.context.database
+        db.remove_item(item)
         self.reload_ui()
-        self.setCurrentPage("album_info_page", album=album)
+        self.setCurrentPage("empty_page")
+
+    def _on_click_edit_album_btn(self) -> None:
+        if self._current_page_name == "empty_page":
+            return
+
+        page_name = self._current_page_name
+        page = self._pages[page_name]
+        if hasattr(page, "album"):
+            item = page.album
+        elif hasattr(page, "shelf"):
+            item = page.shelf
+        else:
+            return
+
+        dialog, exec_code = self.context.call_dialog(
+            EditAlbumDialog(item, self.context)
+                if isinstance(item, AlbumModel) else
+            EditShelfDialog(item, self.context)
+        )
+        if exec_code != 0:
+            return
+
+        self.reload_ui()
+        if hasattr(dialog, "album"):
+            self.setCurrentPage(page_name, album=dialog.album)
+        elif hasattr(dialog, "shelf"):
+            self.setCurrentPage(page_name, shelf=dialog.shelf)
+
+    def _on_click_archive_item_btn(self) -> None:
+        if self._current_page_name == "empty_page":
+            return
+
+        page = self._pages[self._current_page_name]
+        if hasattr(page, "album"):
+            item = page.album
+        elif hasattr(page, "shelf"):
+            item = page.shelf
+        else:
+            return
+
+        item.is_archived = not item.is_archived
+        db: DatabaseController = self.context.database
+        db.update_item(item.name, item)
+        self.reload_ui()
+        self.setCurrentPage("empty_page")
 
     def _on_click_archive_mode_swap_btn(self) -> None:
         self.context.is_archive_mode = not self.context.is_archive_mode
