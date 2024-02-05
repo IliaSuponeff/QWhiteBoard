@@ -4,8 +4,8 @@ from PySide6.QtWidgets import QListWidgetItem
 from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.album_info_page import AlbumInfoPage
-from controllers.album_construct_dialog import CreationAlbumDialog
-from controllers.database import DatabaseController
+from controllers.album_construct_dialog import CreationAlbumDialog, EditAlbumDialog
+from controllers.database import DatabaseController, AlbumModel
 from views.ui_main_page import Ui_MainPage
 from models.shelf import EMPTY_SHELF
 
@@ -20,6 +20,8 @@ class MainPage(AbstractPageController):
                 self.context,
                 bindings={
                     "delete_album_btn": ("clicked", self._on_click_delete_album_btn),
+                    "edit_album_btn": ("clicked", self._on_click_edit_album_btn),
+                    "archive_swap_btn": ("clicked", self._on_click_archive_album_btn)
                 }
             ),
         }
@@ -49,7 +51,8 @@ class MainPage(AbstractPageController):
         self.reload_ui()
 
     def _load_albums(self) -> None:
-        albums = self.context.database.get_shelf_albums(EMPTY_SHELF)
+        albums: list[AlbumModel] = self.context.database.get_shelf_albums(EMPTY_SHELF)
+        albums = list(filter(lambda album: album.is_archived == self.context.is_archive_mode, albums))
         self.context.log(
             LogLevel.DEBUG,
             f"Loaded albums",
@@ -59,7 +62,7 @@ class MainPage(AbstractPageController):
         )
 
         for album in albums:
-            item = QListWidgetItem(self.context.load_icon("album.png"), album.name)
+            item = QListWidgetItem(self.context.load_icon("album.png"), f"{'[ARCHIVE] ' if album.is_archived else ''}{album.name}")
             self.ui.items_list_widget.addItem(item)
 
     def setCurrentPage(self, page_name: str, **kwargs) -> None:
@@ -94,9 +97,11 @@ class MainPage(AbstractPageController):
         return self._ui
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
+        self.ui.archive_swap_btn
         return {
             "add_album_btn": ("clicked", self._on_clicked_add_album_btn),
-            "items_list_widget": ("itemClicked", self._on_click_list_item)
+            "items_list_widget": ("itemClicked", self._on_click_list_item),
+            "archive_swap_btn": ("clicked", self._on_click_archive_mode_swap_btn)
         }
 
     def controller_images(self) -> dict[str, str]:
@@ -113,7 +118,7 @@ class MainPage(AbstractPageController):
 
     def _on_click_list_item(self, item: QListWidgetItem) -> None:
         db: DatabaseController = self.context.database
-        album = db.get_album(item.text())
+        album = db.get_album(item.text().replace("[ARCHIVE]", "").strip())
         self.setCurrentPage("album_info_page", album=album)
 
     def _on_click_delete_album_btn(self) -> None:
@@ -121,3 +126,27 @@ class MainPage(AbstractPageController):
         db.remove_album(self._pages["album_info_page"].album)
         self.reload_ui()
         self.setCurrentPage("empty_page")
+
+    def _on_click_edit_album_btn(self) -> None:
+        dialog, exec_code = self.context.call_dialog(
+            EditAlbumDialog(self._pages["album_info_page"].album, self.context)
+        )
+        if exec_code != 0:
+            return
+
+        self.reload_ui()
+        self.setCurrentPage("album_info_page", album=dialog.album)
+
+    def _on_click_archive_album_btn(self) -> None:
+        album = self._pages["album_info_page"].album
+        album.is_archived = not album.is_archived
+        self.context.database.update_album(album.name, album)
+        self.reload_ui()
+        self.setCurrentPage("album_info_page", album=album)
+
+    def _on_click_archive_mode_swap_btn(self) -> None:
+        self.context.is_archive_mode = not self.context.is_archive_mode
+        self.ui.archive_swap_btn.setText(
+            'Close archive' if self.context.is_archive_mode else 'See archive'
+        )
+        self.reload_ui()

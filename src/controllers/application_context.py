@@ -27,6 +27,7 @@ class ApplicationContext:
         self._application_name = "WhiteBoard"
         self._organization_name = "git.IliaSuponeff"
         self._organization_domain = "https://github.com/IliaSuponeff"
+        self._is_archive_mode = False
 
         # Application resources directories
         root = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -95,6 +96,14 @@ class ApplicationContext:
     @property
     def database(self) -> typing.Optional[QSqlDatabase]:
         return self._database
+
+    @property
+    def is_archive_mode(self) -> bool:
+        return self._is_archive_mode
+
+    @is_archive_mode.setter
+    def is_archive_mode(self, value: bool):
+        self._is_archive_mode = value
 
     @database.setter
     def database(self, value: QSqlDatabase):

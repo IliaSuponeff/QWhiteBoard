@@ -105,3 +105,24 @@ class CreationAlbumDialog(AlbumConstructDialog):
     def _is_valide_album_data(self) -> bool:
         name: str = self.ui.name_le.text().strip()
         return len(name) > 0 and not self.context.database.is_contain_album(album_name=name)
+
+
+class EditAlbumDialog(AlbumConstructDialog):
+
+    def __init__(self, album: AlbumModel, context: ApplicationContext) -> None:
+        super().__init__(album, context)
+
+    def _compile_album(self) -> AlbumModel:
+        # New album data
+        name: str = self.ui.name_le.text().strip()
+        slide_type: SlideType = SlideType[self.ui.slide_type_box.currentText()]
+        width: int = self.ui.width_edit.value()
+        height: int = self.ui.heigth_edit.value()
+        description: str = self.ui.description_text_edit.toPlainText().strip()
+
+        db: DatabaseController = self.context.database
+        return db.create_new_album(name, slide_type, QSize(width, height), description)
+
+    def _is_valide_album_data(self) -> bool:
+        name: str = self.ui.name_le.text().strip()
+        return len(name) > 0 and not self.context.database.is_contain_album(album_name=name)

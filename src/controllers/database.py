@@ -10,9 +10,9 @@ class DatabaseSqlScript(QSqlQuery):
     def __init__(self, script: str, db: QSqlDatabase, **kwargs) -> None:
         super().__init__(db)
         for key, value in kwargs.items():
-            script = script.replace("{{" + key + "}}", str(value))
-
-        self._script = script.strip()
+            script = script.replace("{{" + key + "}}", str(value)).replace('\'', '').replace('(', '').replace(')', '')
+        self._script = script.strip().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
+        print(self.script)
 
     @property
     def script(self) -> str:
@@ -69,7 +69,7 @@ class DatabaseController(QSqlDatabase):
             self.context.log(
                 LogLevel.ERROR,
                 "SQL script error",
-                f"Script: {script_data}",
+                f"Script: {query.script}",
                 f"Error by driver: {query.lastError().driverText()}"
                 f"Error by database: {query.lastError().databaseText()}"
             )
@@ -129,6 +129,21 @@ class DatabaseController(QSqlDatabase):
 
     def remove_album(self, album: AlbumModel) -> None:
         self.execute_script("remove_item", table="albums", field="name", value=album.name)
+
+    def update_album(self, last_name: str ,album: AlbumModel) -> None:
+        self.execute_script(
+            "update_item",
+            table="albums", key="name", key_value=last_name,
+            values=(
+                f"shelf_name=\"{album.shelf_name}\"",
+                f"name=\"{album.name}\"",
+                f"change_on=\"{QDateTime.currentDateTime().toString('yyyy-MM-dd hh:mm')}\"",
+                f"slide_type=\"{album.slide_type.name}\"",
+                f"slide_size=\"{album.slide_size.width()}x{album.slide_size.height()}\"",
+                f"description=\"{album.description}\"",
+                f"is_archived={1 if album.is_archived else 0}",
+            )
+        )
 
     def __del__(self) -> None:
         if not self.isOpen():
