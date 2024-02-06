@@ -20,7 +20,7 @@ class ShelfConstructDialog(AbstractDialogController):
 
         self.ui.name_le.setValidator(input_validator)
         self.ui.name_le.setText(self.shelf.name)
-        self.ui.description_text_edit.setText(self.shelf.description)
+        self.ui.description_text_edit.setPlainText(self.shelf.description.replace('\\r', '\r').replace('\\t', '\t').replace('\\n', '\n'))
 
     @property
     def shelf(self) -> ShelfModel:

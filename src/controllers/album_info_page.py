@@ -27,7 +27,8 @@ class AlbumInfoPage(AbstractPageController):
         self.ui.chage_datetime_edit.setDateTime(album.change_on)
         self.ui.slide_type_le.setText(str(album.slide_type.name))
         self.ui.slide_size_le.setText(f"{album.slide_size.width()}x{album.slide_size.height()}")
-        self.ui.description_te.setText(album.description)
+        self.ui.description_te.setPlainText(album.description.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t'))
+        self.ui.archive_swap_btn.setText('Unarchivate' if album.is_archived else 'Archivate')
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
         return {}

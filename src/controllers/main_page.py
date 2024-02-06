@@ -249,4 +249,8 @@ class MainPage(AbstractPageController):
         self.ui.archive_swap_btn.setText(
             'Close archive' if self.context.is_archive_mode else 'See archive'
         )
+        self.ui.add_album_btn.setDisabled(self.context.is_archive_mode)
+        self.ui.add_new_shelf_btn.setDisabled(self.context.is_archive_mode)
+
         self.reload_ui()
+        self.setCurrentPage("empty_page")

@@ -30,7 +30,7 @@ class AlbumConstructDialog(AbstractDialogController):
         self.ui.slide_type_box.setCurrentText(str(self.album.slide_type.name))
         self.ui.width_edit.setValue(self.album.slide_size.width())
         self.ui.heigth_edit.setValue(self.album.slide_size.height())
-        self.ui.description_text_edit.setText(self.album.description)
+        self.ui.description_text_edit.setPlainText(self.album.description.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t'))
 
     @property
     def album(self) -> AlbumModel:

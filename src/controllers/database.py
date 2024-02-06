@@ -10,9 +10,11 @@ class DatabaseSqlScript(QSqlQuery):
     def __init__(self, script: str, db: QSqlDatabase, **kwargs) -> None:
         super().__init__(db)
         for key, value in kwargs.items():
-            val = str(value).replace('\'', '').replace('(', '').replace(')', '')
-            script = script.replace("{{" + key + "}}", val)
-        self._script = script.strip().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
+            if not isinstance(value, (str, int,)):
+                value = str(value).replace('(', '').replace(')', '').replace('\'', '')
+
+            script = script.replace("{{" + key + "}}", str(value))
+        self._script = script.strip()
 
     @property
     def script(self) -> str:
