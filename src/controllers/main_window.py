@@ -2,6 +2,7 @@ import pprint
 from PySide6.QtWidgets import QMainWindow
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.main_page import MainPage, AbstractPageController
+from controllers.shelf_page import ShelfPage
 from views.ui_main_window import Ui_MainWindow
 
 
@@ -17,10 +18,16 @@ class WhiteBoardWindow(QMainWindow):
                 bindings={
                     "MainPage": {
                         ("openAlbum", print),
-                        ("openShelf", print),
+                        ("openShelf", lambda shelf: self.setCurrentPage("shelf_page", shelf=shelf)),
                     },
                 }
             ),
+            "shelf_page": ShelfPage(
+                self.context,
+                bindings={
+                    "back_btn": ("clicked", self._back_previous_page),
+                }
+            )
         }
         self._call_history = []
         self._initUI()
@@ -54,7 +61,7 @@ class WhiteBoardWindow(QMainWindow):
     def context(self) -> ApplicationContext:
         return self._context
 
-    def setCurrentPage(self, page_name: str, save_history: bool = True) -> None:
+    def setCurrentPage(self, page_name: str, save_history: bool = True, **kwargs) -> None:
         if page_name not in self._pages:
             self.context.log(
                 LogLevel.ERROR,
@@ -89,4 +96,15 @@ class WhiteBoardWindow(QMainWindow):
         if save_history:
             self._call_history.append(page_name)
 
-        self.ui.pages_stack_widget.setCurrentWidget(self._pages[page_name])
+        self.ui.pages_stack_widget.setCurrentWidget(page)
+        if hasattr(page, "updateData"):
+            page.updateData(**kwargs)
+
+    def _back_previous_page(self):
+        if len(self._call_history) <= 1:
+            return
+
+        self._call_history.pop() ## Now value
+        page_name = self._call_history.pop() ## Last value, need to be load as current
+        self.setCurrentPage(page_name, save_history=True)
+

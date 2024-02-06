@@ -283,12 +283,10 @@ class MainPage(AbstractPageController):
         if self.context.is_archive_mode:
             return
 
-        db: DatabaseController = self.context.database
         index = self.ui.items_list_widget.row(item)
-        
         if 0 <= index < self._shelfs_count:
             page = self._pages["shelf_info_page"]
-            self.openAlbum.emit(page.shelf)
+            self.openShelf.emit(page.shelf)
         else:
             page = self._pages["album_info_page"]
             self.openAlbum.emit(page.album)

@@ -25,6 +25,7 @@ class Ui_AlbumInfoPage(object):
 		if not AlbumInfoPage.objectName():
 			AlbumInfoPage.setObjectName(u"AlbumInfoPage")
 		AlbumInfoPage.resize(691, 583)
+		AlbumInfoPage.setMaximumSize(QSize(16777215, 16777215))
 		self.verticalLayout = QVBoxLayout(AlbumInfoPage)
 		self.verticalLayout.setObjectName(u"verticalLayout")
 		self.album_name_lbl = QLabel(AlbumInfoPage)
