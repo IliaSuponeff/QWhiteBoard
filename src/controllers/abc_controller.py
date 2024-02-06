@@ -33,7 +33,7 @@ class AbstractPageController(QWidget):
             self._bind_signal(ui_element, bindings[ui_element_name])
 
     def _bind_signal(self, ui_element: QObject, binding: tuple[str, object] | set[tuple[str, object]]) -> None:
-        if isinstance(binding, set):
+        if isinstance(binding, (set, frozenset,)):
             for bind_tuple in binding:
                 self._bind_signal(ui_element, bind_tuple)
 
@@ -48,6 +48,7 @@ class AbstractPageController(QWidget):
                 "Bind object must be tuple or list with length 2. "
                 "First element is name of ui element and second element is callback function"
             )
+            return
 
         try:
             signal_name = binding[0]
