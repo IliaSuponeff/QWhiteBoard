@@ -132,6 +132,11 @@ class Ui_AlbumInfoPage(object):
 
 		self.hLayout_2.addItem(self.hSpacer_1)
 
+		self.open_album_btn = QPushButton(AlbumInfoPage)
+		self.open_album_btn.setObjectName(u"open_album_btn")
+
+		self.hLayout_2.addWidget(self.open_album_btn)
+
 		self.edit_album_btn = QPushButton(AlbumInfoPage)
 		self.edit_album_btn.setObjectName(u"edit_album_btn")
 
@@ -171,6 +176,7 @@ class Ui_AlbumInfoPage(object):
 		self.info_lbl_3.setText(QCoreApplication.translate("AlbumInfoPage", u"### SlideType", None))
 		self.info_lbl_5.setText(QCoreApplication.translate("AlbumInfoPage", u"### Description", None))
 		self.description_te.setDocumentTitle("")
+		self.open_album_btn.setText(QCoreApplication.translate("AlbumInfoPage", u"Open", None))
 		self.edit_album_btn.setText(QCoreApplication.translate("AlbumInfoPage", u"Edit", None))
 		self.archive_swap_btn.setText(QCoreApplication.translate("AlbumInfoPage", u"Archivate", None))
 		self.delete_album_btn.setText(QCoreApplication.translate("AlbumInfoPage", u"Delete", None))

@@ -12,7 +12,15 @@ class WhiteBoardWindow(QMainWindow):
         self._context = context
         self._ui = Ui_MainWindow()
         self._pages = {
-            "main_page": MainPage(self.context),
+            "main_page": MainPage(
+                self.context,
+                bindings={
+                    "MainPage": {
+                        ("openAlbum", print),
+                        ("openShelf", print),
+                    },
+                }
+            ),
         }
         self._call_history = []
         self._initUI()

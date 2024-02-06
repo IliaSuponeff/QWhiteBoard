@@ -1,5 +1,5 @@
 import pprint
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Signal
 from PySide6.QtWidgets import QListWidgetItem
 from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext, LogLevel
@@ -7,12 +7,15 @@ from controllers.album_info_page import AlbumInfoPage
 from controllers.shelf_info_page import ShelfInfoPage
 from controllers.album_construct_dialog import CreationAlbumDialog, EditAlbumDialog
 from controllers.shelf_construct_dialog import CreationShelfDialog, EditShelfDialog
-from controllers.database import DatabaseController, AlbumModel
+from controllers.database import DatabaseController, AlbumModel, ShelfModel
 from views.ui_main_page import Ui_MainPage
 from models.shelf import EMPTY_SHELF
 
 
 class MainPage(AbstractPageController):
+
+    openAlbum = Signal((AlbumModel,))
+    openShelf = Signal((ShelfModel,))
 
     def __init__(self, context: ApplicationContext, bindings: dict[str, list[str]] = {}) -> None:
         super().__init__(context, Ui_MainPage(), bindings)
@@ -23,7 +26,8 @@ class MainPage(AbstractPageController):
                 bindings={
                     "delete_album_btn": ("clicked", self._on_click_delete_item_btn),
                     "edit_album_btn": ("clicked", self._on_click_edit_album_btn),
-                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn)
+                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn),
+                    "open_album_btn": ("clicked", self._on_click_open_item_btn),
                 }
             ),
             "shelf_info_page": ShelfInfoPage(
@@ -31,7 +35,8 @@ class MainPage(AbstractPageController):
                 bindings={
                     "delete_shelf_btn": ("clicked", self._on_click_delete_item_btn),
                     "edit_shelf_btn": ("clicked", self._on_click_edit_album_btn),
-                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn)
+                    "archive_swap_btn": ("clicked", self._on_click_archive_item_btn),
+                    "open_shelf_btn": ("clicked", self._on_click_open_item_btn),
                 }
             )
         }
@@ -141,16 +146,20 @@ class MainPage(AbstractPageController):
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
         return {
-            "add_album_btn": ("clicked", self._on_clicked_add_album_btn),
+            "add_album_btn": ("clicked", self._on_clicked_add_new_album_btn),
             "add_new_shelf_btn": ("clicked", self._on_clicked_add_new_shelf_btn),
-            "items_list_widget": ("currentItemChanged", self._on_click_list_item),
             "archive_swap_btn": ("clicked", self._on_click_archive_mode_swap_btn),
+            "items_list_widget": {
+                ("currentItemChanged", self._on_click_list_item),
+                ("itemActivated", self._on_double_click_list_item),
+                ("itemDoubleClicked", self._on_double_click_list_item),
+            },
         }
 
     def controller_images(self) -> dict[str, str]:
         return {}
 
-    def _on_clicked_add_album_btn(self) -> None:
+    def _on_clicked_add_new_album_btn(self) -> None:
         dialog, exec_code = self.context.call_dialog(
             CreationAlbumDialog(self.context)
         )
@@ -253,4 +262,35 @@ class MainPage(AbstractPageController):
         self.ui.add_new_shelf_btn.setDisabled(self.context.is_archive_mode)
 
         self.reload_ui()
+        self.setCurrentPage("empty_page")
+
+    def _on_click_open_item_btn(self):
+        if self._current_page_name == "empty_page":
+            return
+
+        page = self._pages[self._current_page_name]
+        if hasattr(page, "album"):
+            self.openAlbum.emit(page.album)
+        elif hasattr(page, "shelf"):
+            self.openAlbum.emit(page.shelf)
+
+        self.setCurrentPage("empty_page")
+
+    def _on_double_click_list_item(self, item: QListWidgetItem):
+        if item is None:
+            return
+
+        if self.context.is_archive_mode:
+            return
+
+        db: DatabaseController = self.context.database
+        index = self.ui.items_list_widget.row(item)
+        
+        if 0 <= index < self._shelfs_count:
+            page = self._pages["shelf_info_page"]
+            self.openAlbum.emit(page.shelf)
+        else:
+            page = self._pages["album_info_page"]
+            self.openAlbum.emit(page.album)
+
         self.setCurrentPage("empty_page")

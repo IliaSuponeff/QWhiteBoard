@@ -24,8 +24,9 @@ class Ui_ShelfConstructDialog(object):
 		if not ShelfConstructDialog.objectName():
 			ShelfConstructDialog.setObjectName(u"ShelfConstructDialog")
 		ShelfConstructDialog.setWindowModality(Qt.ApplicationModal)
-		ShelfConstructDialog.resize(600, 600)
+		ShelfConstructDialog.resize(600, 400)
 		ShelfConstructDialog.setMinimumSize(QSize(600, 400))
+		ShelfConstructDialog.setMaximumSize(QSize(600, 400))
 		ShelfConstructDialog.setModal(True)
 		self.vLayout_1 = QVBoxLayout(ShelfConstructDialog)
 		self.vLayout_1.setObjectName(u"vLayout_1")

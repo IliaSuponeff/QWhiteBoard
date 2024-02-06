@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>691</width>
+    <width>682</width>
     <height>583</height>
    </rect>
   </property>
@@ -144,6 +144,16 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="open_shelf_btn">
+       <property name="text">
+        <string>Open</string>
+       </property>
+       <property name="shortcut">
+        <string/>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="edit_shelf_btn">

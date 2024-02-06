@@ -26,6 +26,8 @@ class ShelfInfoPage(AbstractPageController):
         self.ui.chage_datetime_edit.setDateTime(shelf.change_on)
         self.ui.description_te.setPlainText(self.shelf.description.replace('\\r', '\r').replace('\\t', '\t').replace('\\n', '\n'))
         self.ui.archive_swap_btn.setText('Unarchivate' if shelf.is_archived else 'Archivate')
+        self.ui.open_shelf_btn.setDisabled(self.context.is_archive_mode)
+        self.ui.edit_shelf_btn.setDisabled(self.context.is_archive_mode)
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
         return {}

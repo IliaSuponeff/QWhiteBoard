@@ -23,7 +23,7 @@ class Ui_ShelfInfoPage(object):
 	def setupUi(self, ShelfInfoPage):
 		if not ShelfInfoPage.objectName():
 			ShelfInfoPage.setObjectName(u"ShelfInfoPage")
-		ShelfInfoPage.resize(691, 583)
+		ShelfInfoPage.resize(682, 583)
 		self.verticalLayout = QVBoxLayout(ShelfInfoPage)
 		self.verticalLayout.setObjectName(u"verticalLayout")
 		self.shelf_name_lbl = QLabel(ShelfInfoPage)
@@ -98,6 +98,11 @@ class Ui_ShelfInfoPage(object):
 
 		self.hLayout_2.addItem(self.hSpacer_1)
 
+		self.open_shelf_btn = QPushButton(ShelfInfoPage)
+		self.open_shelf_btn.setObjectName(u"open_shelf_btn")
+
+		self.hLayout_2.addWidget(self.open_shelf_btn)
+
 		self.edit_shelf_btn = QPushButton(ShelfInfoPage)
 		self.edit_shelf_btn.setObjectName(u"edit_shelf_btn")
 
@@ -133,6 +138,7 @@ class Ui_ShelfInfoPage(object):
 		self.info_lbl_2.setText(QCoreApplication.translate("ShelfInfoPage", u"### Change on", None))
 		self.info_lbl_5.setText(QCoreApplication.translate("ShelfInfoPage", u"### Description", None))
 		self.description_te.setDocumentTitle("")
+		self.open_shelf_btn.setText(QCoreApplication.translate("ShelfInfoPage", u"Open", None))
 		self.edit_shelf_btn.setText(QCoreApplication.translate("ShelfInfoPage", u"Edit", None))
 		self.archive_swap_btn.setText(QCoreApplication.translate("ShelfInfoPage", u"Archivate", None))
 		self.delete_shelf_btn.setText(QCoreApplication.translate("ShelfInfoPage", u"Delete", None))

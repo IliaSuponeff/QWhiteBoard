@@ -29,6 +29,8 @@ class AlbumInfoPage(AbstractPageController):
         self.ui.slide_size_le.setText(f"{album.slide_size.width()}x{album.slide_size.height()}")
         self.ui.description_te.setPlainText(album.description.replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t'))
         self.ui.archive_swap_btn.setText('Unarchivate' if album.is_archived else 'Archivate')
+        self.ui.open_album_btn.setDisabled(self.context.is_archive_mode)
+        self.ui.edit_album_btn.setDisabled(self.context.is_archive_mode)
 
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
         return {}
