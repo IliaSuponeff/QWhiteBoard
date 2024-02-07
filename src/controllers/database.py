@@ -144,7 +144,13 @@ class DatabaseController(QSqlDatabase):
         if shelf is None:
             return []
 
-        query = self.execute_script("get_item", table="albums", field="shelf_name", value=shelf.name)[0]
+        return self.get_shelf_albums_by_name(shelf_name=shelf.name)
+
+    def get_shelf_albums_by_name(self, shelf_name) -> list[AlbumModel]:
+        if shelf_name is None:
+            return []
+
+        query = self.execute_script("get_item", table="albums", field="shelf_name", value=str(shelf_name))[0]
         albums = []
         while query.next():
             album = AlbumModel(
@@ -179,10 +185,19 @@ class DatabaseController(QSqlDatabase):
         return shelfs
 
     def remove_album(self, album: AlbumModel) -> None:
-        self.execute_script("remove_item", table="albums", field="name", value=album.name)
+        self.remove_album_by_name(album_name=album.name)
+
+    def remove_album_by_name(self, album_name: str) -> None:
+        self.execute_script("remove_item", table="albums", field="name", value=album_name)
 
     def remove_shelf(self, shelf: ShelfModel) -> None:
-        self.execute_script("remove_item", table="shelfs", field="name", value=shelf.name)
+        self.remove_shelf_by_name(shelf_name=shelf.name)
+
+    def remove_shelf_by_name(self, shelf_name: str) -> None:
+        self.execute_script("remove_item", table="shelfs", field="name", value=shelf_name)
+        shelf_albums = self.get_shelf_albums_by_name(shelf_name=shelf_name)
+        for album in shelf_albums:
+            self.remove_album(album)
 
     def remove_item(self, item: object) -> None:
         if isinstance(item, AlbumModel):
@@ -192,7 +207,7 @@ class DatabaseController(QSqlDatabase):
         else:
             self.context.log(LogLevel.ERROR, f"Unknown item type: {item} to delete it")
 
-    def update_album(self, last_name: str ,album: AlbumModel) -> None:
+    def update_album(self, last_name: str, album: AlbumModel) -> None:
         self.execute_script(
             "update_item",
             table="albums", key="name", key_value=last_name,

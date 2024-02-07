@@ -26,6 +26,7 @@ class WhiteBoardWindow(QMainWindow):
                 self.context,
                 bindings={
                     "back_btn": ("clicked", self._back_previous_page),
+                    "ShelfPage": ("openAlbum", print),
                 }
             )
         }

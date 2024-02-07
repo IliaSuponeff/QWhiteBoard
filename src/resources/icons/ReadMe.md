@@ -34,3 +34,8 @@ Images for the application are downloaded from the website [flaticon](https://ww
    * Link: [Go to the website](https://www.flaticon.com/free-icon/bookshelf_2579669?term=shelf&related_id=2579669)
    * Author: [Smashicons](https://www.flaticon.com/authors/smashicons)
    * Size: `64x64`
+7. Back icon
+   * File: `./back.png`
+   * Link: [Go to the website](https://www.flaticon.com/free-icon/undo_8022662?term=back&page=1&position=20&origin=search&related_id=8022662)
+   * Author: [icon_small](https://www.flaticon.com/authors/icon-small)
+   * Size: `64x64`

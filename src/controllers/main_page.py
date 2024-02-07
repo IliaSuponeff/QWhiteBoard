@@ -292,3 +292,7 @@ class MainPage(AbstractPageController):
             self.openAlbum.emit(page.album)
 
         self.setCurrentPage("empty_page")
+
+    def updateData(self, **kwargs) -> None:
+        self.reload_ui()
+        self.setCurrentPage("empty_page")

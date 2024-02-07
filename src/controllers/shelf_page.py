@@ -1,16 +1,19 @@
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Signal
 from PySide6.QtWidgets import QListWidgetItem
 from controllers.abc_controller import AbstractPageController, LogLevel
 from controllers.application_context import ApplicationContext
 from controllers.album_info_page import AlbumInfoPage
 from controllers.album_construct_dialog import CreationAlbumDialog, EditAlbumDialog
+from controllers.connect_album_dialog import ConnectAlbumDialog
 from controllers.database import DatabaseController
 from models.album import AlbumModel
-from models.shelf import ShelfModel
+from models.shelf import ShelfModel, GLOBAL_SHELF
 from views.ui_shelf_page import Ui_ShelfPage
 
 
 class ShelfPage(AbstractPageController):
+
+    openAlbum = Signal((AlbumModel,))
 
     def __init__(self, context: ApplicationContext, bindings: dict[str, list[str]] = {}) -> None:
         super().__init__(context, Ui_ShelfPage(), bindings)
@@ -19,10 +22,10 @@ class ShelfPage(AbstractPageController):
             "album_info_page": AlbumInfoPage(
                 self.context,
                 bindings={
-                    # "delete_album_btn": ("clicked", self._on_click_delete_item_btn),
-                    # "edit_album_btn": ("clicked", self._on_click_edit_album_btn),
-                    # "archive_swap_btn": ("clicked", self._on_click_archive_item_btn),
-                    # "open_album_btn": ("clicked", self._on_click_open_item_btn),
+                    "delete_album_btn": ("clicked", self._on_click_delete_album_btn),
+                    "edit_album_btn": ("clicked", self._on_click_edit_album_btn),
+                    "archive_swap_btn": ("clicked", self._on_click_archive_album_btn),
+                    "open_album_btn": ("clicked", self._on_click_open_album_btn),
                 }
             )
         }
@@ -64,7 +67,6 @@ class ShelfPage(AbstractPageController):
             LogLevel.DEBUG,
             f"Loaded albums",
             f"Controller: {self.__class__.__name__}",
-            f"Mode: {'ARCHIVE' if self.context.is_archive_mode else 'NORMAL'}",
             f"Albums count: {len(albums)}",
             *albums
         )
@@ -72,7 +74,7 @@ class ShelfPage(AbstractPageController):
         for album in albums:
             item = QListWidgetItem(
                 self.context.load_icon("album.png"),
-                f"{'[ARCHIVE] ' if album.is_archived else ''}{album.name}"
+                f"{album.name}"
             )
             self.ui.albums_list.addItem(item)
 
@@ -96,6 +98,10 @@ class ShelfPage(AbstractPageController):
             "add_new_album_btn": ("clicked", self._on_click_add_new_album_btn),
             "connect_album_btn": ("clicked", self._on_click_connect_album_btn),
             "disconnect_album_btn": ("clicked", self._on_click_disconnect_album_btn),
+            "albums_list": {
+                ("currentItemChanged", self._on_click_albums_list_item),
+                ("itemDoubleClicked", self._on_click_open_album_btn)
+            }
         }
 
     def controller_images(self) -> dict[str, str|tuple[str, QSize]]:
@@ -114,9 +120,74 @@ class ShelfPage(AbstractPageController):
 
         self._reload_albums()
 
-
     def _on_click_connect_album_btn(self):
-        print("Connect album")
+        dialog, exec_code = self.context.call_dialog(
+            ConnectAlbumDialog(self.context, self.shelf)
+        )
+
+        if exec_code != 0:
+            return
+
+        self._reload_albums()
 
     def _on_click_disconnect_album_btn(self):
-        print("Disconnect album")
+        db: DatabaseController = self.context.database
+        album_item: QListWidgetItem = self.ui.albums_list.currentItem()
+        if album_item is None:
+            return
+
+        album = db.get_album(album_item.text())
+        album.shelf_name = GLOBAL_SHELF.name
+        db.update_album(album.name, album)
+        self._reload_albums()
+
+    def _on_click_albums_list_item(self, item: QListWidgetItem, *args) -> None:
+        if item is None:
+            return
+
+        album = self.context.database.get_album(item.text())
+        self.setCurrentPage("album_info_page", album=album)
+
+    def _on_click_delete_album_btn(self):
+        album: AlbumModel = self._pages["album_info_page"].album
+        if album is None:
+            return
+
+        db: DatabaseController = self.context.database
+        db.remove_album(album)
+        self._reload_albums()
+
+    def _on_click_archive_album_btn(self):
+        album: AlbumModel = self._pages["album_info_page"].album
+        print(album)
+        if album is None:
+            return
+
+        album.is_archived = not album.is_archived
+        album.shelf_name = GLOBAL_SHELF.name
+
+        db: DatabaseController = self.context.database
+        db.update_album(album.name, album)
+        self._reload_albums()
+
+    def _on_click_edit_album_btn(self):
+        album: AlbumModel = self._pages["album_info_page"].album
+        if album is None:
+            return
+
+        dialog, exec_code = self.context.call_dialog(
+            EditAlbumDialog(album, self.context)
+        )
+
+        if exec_code != 0:
+            return
+
+        self._reload_albums()
+        self.setCurrentPage("album_info_page", album=dialog.album)
+
+    def _on_click_open_album_btn(self):
+        album: AlbumModel = self._pages["album_info_page"].album
+        if album is None:
+            return
+
+        self.openAlbum.emit(album)
