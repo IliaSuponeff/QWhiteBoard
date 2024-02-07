@@ -3,7 +3,7 @@ from controllers.abc_controller import AbstractDialogController
 from controllers.application_context import ApplicationContext, LogLevel
 from controllers.database import DatabaseController
 from views.ui_shelf_construct_dialog import Ui_ShelfConstructDialog
-from models.shelf import ShelfModel, EMPTY_SHELF, QDateTime
+from models.shelf import ShelfModel, GLOBAL_SHELF, QDateTime
 from PySide6.QtGui import QRegularExpressionValidator
 
 
@@ -67,7 +67,7 @@ class ShelfConstructDialog(AbstractDialogController):
 class CreationShelfDialog(ShelfConstructDialog):
 
     def __init__(self, context: ApplicationContext) -> None:
-        super().__init__(EMPTY_SHELF, context)
+        super().__init__(GLOBAL_SHELF, context)
 
     def _compile_shelf(self) -> ShelfModel:
         name: str = self.ui.name_le.text().strip()

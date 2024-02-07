@@ -1,15 +1,15 @@
 from controllers.abc_controller import AbstractPageController
 from controllers.application_context import ApplicationContext
 from views.ui_shelf_info_page import Ui_ShelfInfoPage
-from models.shelf import EMPTY_SHELF, ShelfModel
+from models.shelf import GLOBAL_SHELF, ShelfModel
 
 
 class ShelfInfoPage(AbstractPageController):
 
     def __init__(self, context: ApplicationContext, bindings: dict[str, list[str]] = {}) -> None:
         super().__init__(context, Ui_ShelfInfoPage(), bindings)
-        self._shelf: ShelfModel = EMPTY_SHELF
-        self.updateData(EMPTY_SHELF)
+        self._shelf: ShelfModel = GLOBAL_SHELF
+        self.updateData(GLOBAL_SHELF)
 
     @property
     def ui(self) -> Ui_ShelfInfoPage:

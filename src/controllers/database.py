@@ -90,10 +90,11 @@ class DatabaseController(QSqlDatabase):
         query.next()
         return query.value(0) != 0
 
-    def create_new_album(self, album_name: str, slide_type: SlideType, slide_size: QSize, description: str) -> AlbumModel:
+    def create_new_album(self, album_name: str, shelf_name: str, slide_type: SlideType, slide_size: QSize, description: str) -> AlbumModel:
         query = self.execute_script(
             "add_album",
             name=album_name,
+            shelf_name=shelf_name,
             create_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
             change_on=QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm"),
             slide_type=slide_type.name,
@@ -140,6 +141,9 @@ class DatabaseController(QSqlDatabase):
         )
 
     def get_shelf_albums(self, shelf: ShelfModel) -> list[AlbumModel]:
+        if shelf is None:
+            return []
+
         query = self.execute_script("get_item", table="albums", field="shelf_name", value=shelf.name)[0]
         albums = []
         while query.next():

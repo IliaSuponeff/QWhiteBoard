@@ -71,4 +71,4 @@ class ShelfModel:
         return self._id == __value._id or self._name == __value._name
 
 
-EMPTY_SHELF = ShelfModel(-1, "", QDateTime.currentDateTime(), QDateTime.currentDateTime(), "", False)
+GLOBAL_SHELF = ShelfModel(-1, "", QDateTime.currentDateTime(), QDateTime.currentDateTime(), "", False)

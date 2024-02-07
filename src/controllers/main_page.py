@@ -9,7 +9,7 @@ from controllers.album_construct_dialog import CreationAlbumDialog, EditAlbumDia
 from controllers.shelf_construct_dialog import CreationShelfDialog, EditShelfDialog
 from controllers.database import DatabaseController, AlbumModel, ShelfModel
 from views.ui_main_page import Ui_MainPage
-from models.shelf import EMPTY_SHELF
+from models.shelf import GLOBAL_SHELF
 
 
 class MainPage(AbstractPageController):
@@ -93,7 +93,7 @@ class MainPage(AbstractPageController):
             self.ui.items_list_widget.addItem(item)
 
     def _load_albums(self) -> None:
-        albums: list[AlbumModel] = self.context.database.get_shelf_albums(EMPTY_SHELF)
+        albums: list[AlbumModel] = self.context.database.get_shelf_albums(GLOBAL_SHELF)
         albums = list(filter(lambda album: album.is_archived == self.context.is_archive_mode, albums))
         self.context.log(
             LogLevel.DEBUG,

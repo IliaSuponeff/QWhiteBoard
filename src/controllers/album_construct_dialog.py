@@ -4,6 +4,7 @@ from controllers.application_context import ApplicationContext, LogLevel
 from controllers.database import DatabaseController
 from views.ui_album_construct_dialog import Ui_AlbumConstructDialog
 from models.album import AlbumModel, EMPTY_ALBUM, SlideType, QDateTime
+from models.shelf import ShelfModel, GLOBAL_SHELF
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtCore import QSize
 
@@ -88,8 +89,9 @@ class AlbumConstructDialog(AbstractDialogController):
 
 class CreationAlbumDialog(AlbumConstructDialog):
 
-    def __init__(self, context: ApplicationContext) -> None:
+    def __init__(self, context: ApplicationContext, parent_shelf: ShelfModel = GLOBAL_SHELF) -> None:
         super().__init__(EMPTY_ALBUM, context)
+        self._shelf = parent_shelf
 
     def _compile_album(self) -> AlbumModel:
         # New album data
@@ -100,7 +102,7 @@ class CreationAlbumDialog(AlbumConstructDialog):
         description: str = self.ui.description_text_edit.toPlainText().strip()
 
         db: DatabaseController = self.context.database
-        return db.create_new_album(name, slide_type, QSize(width, height), description)
+        return db.create_new_album(name, self._shelf.name, slide_type, QSize(width, height), description)
 
     def _is_valide_album_data(self) -> bool:
         name: str = self.ui.name_le.text().strip()

@@ -1,6 +1,6 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QSize, Qt
 from PySide6.QtWidgets import QWidget, QDialog
-from controllers.application_context import ApplicationContext, LogLevel
+from controllers.application_context import ApplicationContext, LogLevel, QIcon
 
 
 class AbstractPageController(QWidget):
@@ -17,7 +17,7 @@ class AbstractPageController(QWidget):
     def controller_bindings(self) -> dict[str, tuple[str, object]]:
         return {}
 
-    def controller_images(self) -> dict[str, str]:
+    def controller_images(self) -> dict[str, str|tuple[str, QSize]]:
         return {}
 
     def load_bindings(self, bindings: dict[str, set[tuple[str, object]]]) -> None:
@@ -73,19 +73,31 @@ class AbstractPageController(QWidget):
                 continue
 
             ui_element = getattr(self.ui, ui_element_name)
-            image_name = images[ui_element_name]
-            if hasattr(ui_element, "setPixmap"):
-                ui_element.setPixmap(self.context.load_pixmap(image_name))
-                continue
+            self._load_image(ui_element, images[ui_element_name])
 
-            if hasattr(ui_element, "setIcon"):
-                ui_element.setIcon(self.context.load_icon(image_name))
-                continue
+    def _load_image(self, ui_element: QObject, image_info: str | tuple[str, QSize]):
+        image_name = image_info[0] if isinstance(image_info, tuple) else image_info
+        image = self.context.load_pixmap(image_name)
+        if isinstance(image_info, tuple):
+            size = image_info[1]
+            image = image.scaled(size)
+            if hasattr(ui_element, "setIconSize"):
+                ui_element.setIconSize(size)
 
-            self.context.log(
-                LogLevel.ERROR,
-                f"Failed to load image {image_name} for UI object {ui_element_name} on {self.__class__.__name__}"
-            )
+        if hasattr(ui_element, "setPixmap"):
+            ui_element.setPixmap(image)
+            return
+        elif hasattr(ui_element, "setIcon"):
+            ui_element.setIcon(QIcon(image))
+            return
+
+        self.context.log(
+            LogLevel.ERROR,
+            f"Failed to load image",
+            f"Controller: {self.__class__.__name__}",
+            f"Image name: {image_name}",
+            f"UI object: {ui_element.objectName()}",
+        )
 
     @property
     def context(self) -> ApplicationContext:

@@ -13,62 +13,114 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="hLayout_2">
+  <layout class="QVBoxLayout" name="vLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="vLayout_1">
+    <layout class="QHBoxLayout" name="hLayout_3">
      <item>
-      <layout class="QHBoxLayout" name="hLayout_1">
-       <item>
-        <widget class="QPushButton" name="back_btn">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="add_new_album_btn">
-         <property name="text">
-          <string>Add new album</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="connect_album_btn">
-         <property name="text">
-          <string>Connect  album</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="disconnect_album_btn">
-         <property name="text">
-          <string>Disconnect  album</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QPushButton" name="back_btn">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QListWidget" name="albums_list"/>
+      <widget class="QLabel" name="img_lbl_1">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="shelf_name_lbl">
+       <property name="text">
+        <string># ShelfName</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::MarkdownText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="hSpacer_1">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QStackedWidget" name="albums_info_stack">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>3</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <widget class="QWidget" name="empty_page"/>
-    </widget>
+    <layout class="QHBoxLayout" name="hLayout_2">
+     <item>
+      <widget class="QFrame" name="albums_tools_frame">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <layout class="QVBoxLayout" name="vLayout_1">
+        <item>
+         <layout class="QHBoxLayout" name="hLayout_1">
+          <item>
+           <widget class="QPushButton" name="add_new_album_btn">
+            <property name="text">
+             <string>Add new album</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="connect_album_btn">
+            <property name="text">
+             <string>Connect  album</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="disconnect_album_btn">
+            <property name="text">
+             <string>Disconnect  album</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QListWidget" name="albums_list"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QStackedWidget" name="albums_info_stack">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>3</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <widget class="QWidget" name="empty_page"/>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
